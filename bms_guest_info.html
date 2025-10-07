@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BMS • Hausordnung & Gäste-Info</title>
+<style>
+  :root {
+    --overlay: rgba(0,0,0,.55);
+    --text: #F2F3F5;
+    --muted: #B9C0CC;
+    --border: #1C2230;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    color: var(--text);
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, "Noto Sans";
+    line-height: 1.45;
+    background: #000;
+  }
+  .bg { position: fixed; inset: 0; z-index: -2; background: url('WCKH1346 (4).jpg') center/cover no-repeat fixed; }
+  .overlay { position: fixed; inset: 0; z-index: -1; background: var(--overlay); }
+
+  header {
+    position: sticky; top:0; z-index: 10;
+    backdrop-filter: blur(8px);
+    background: rgba(0,0,0,.35);
+    border-bottom: 1px solid var(--border);
+  }
+  .wrap { max-width: 1024px; margin: 0 auto; padding: 14px 16px; display:flex; align-items:center; justify-content:space-between; }
+  .brand { display:flex; gap:12px; align-items:center; }
+  .brand img { width:32px; height:32px; border-radius:8px; }
+  .brand strong { letter-spacing:.2px; }
+  .actions { display:flex; gap:12px; align-items:center; }
+  .link { color: var(--muted); text-decoration:none; font-size:14px; }
+  .link:hover { color:#fff; text-decoration:underline; }
+  .lang { color:#E7ECF6; text-decoration: underline; cursor:pointer; font-size:14px; }
+
+  main { max-width: 1024px; margin: 0 auto; height: calc(100vh - 64px);
+          overflow-y: auto; scroll-snap-type: y mandatory; scroll-behavior:smooth; }
+  section { min-height: 100vh; scroll-snap-align: start; display:flex; align-items:center; justify-content:center; padding: 24px; }
+  .panel {
+    width: 100%; max-width: 820px;
+    background: rgba(0,0,0,.35);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 12px 40px rgba(0,0,0,.35);
+    padding: 26px 30px;
+    backdrop-filter: blur(4px);
+  }
+  .panel h3 { margin: 0 0 14px; font-size: 18px; font-weight: 600; }
+  .title { text-align: center; text-shadow: 0 2px 16px rgba(0,0,0,.35); }
+  .title h1 { margin: 0 0 8px; font-size: 30px; color:#fff; }
+  .title p { margin: 0; color: var(--muted); }
+
+  ul { margin: 8px 0 0 20px; }
+  .row { display:flex; flex-wrap:wrap; gap:10px; margin-bottom: 8px; }
+  .btn { display:inline-flex; align-items:center; gap:10px; border:1px solid var(--border);
+         padding:9px 14px; border-radius:12px; background: rgba(0,0,0,.45); color:#fff; font-size:14px; text-decoration:none; }
+  .btn:hover { background: rgba(0,0,0,.6); }
+
+  footer { max-width:1024px; margin: 0 auto; padding: 0 16px 24px; color: var(--muted); font-size:12px; text-shadow: 0 1px 10px rgba(0,0,0,.4); }
+
+  /* Language modal */
+  .modal { position: fixed; inset:0; display:flex; align-items:center; justify-content:center; background: rgba(0,0,0,.6); z-index: 50; }
+  .modal-card { width: 96%; max-width: 520px; background: rgba(0,0,0,.6); color:#fff; border:1px solid var(--border);
+                 border-radius:16px; padding: 20px; box-shadow: 0 16px 40px rgba(0,0,0,.5); backdrop-filter: blur(12px); }
+  .modal h3 { margin: 0 0 8px; }
+  .modal p { margin: 0 0 16px; color:#E1E7F1; }
+  .modal .options { display:flex; gap:12px; flex-wrap: wrap; }
+  .modal .options button { flex:1; min-width: 140px; padding: 12px 14px; border-radius: 12px; border:1px solid var(--border);
+                            background: rgba(0,0,0,.55); color:#fff; cursor:pointer; font-weight:600;}
+  .modal .options button:hover { background: rgba(0,0,0,.75); }
+</style>
+</head>
+<body>
+<div class="bg"></div><div class="overlay"></div>
+<header>
+  <div class="wrap">
+    <div class="brand">
+      <img src="2024_BMS_yingyangyong_Logo.png" alt="BMS Logo">
+      <strong id="t_brand">BMS • Hausordnung & Gäste-Info</strong>
+    </div>
+    <div class="actions">
+      <a class="link" href="javascript:window.print()" id="t_print">Seite drucken</a>
+      <span class="lang" id="btnChangeLang">DE / EN</span>
+    </div>
+  </div>
+</header>
+
+<!-- Language Modal -->
+<div class="modal" id="langModal" role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <h3 id="t_modal_title">Sprache wählen</h3>
+    <p id="t_modal_desc">Bitte wähle deine Sprache / Please choose your language.</p>
+    <div class="options">
+      <button id="chooseDE">Deutsch</button>
+      <button id="chooseEN">English</button>
+    </div>
+  </div>
+</div>
+
+<main id="slider">
+  <section>
+    <div class="title">
+      <h1 id="t_welcome_title">Willkommen – Gästezimmer</h1>
+      <p id="t_welcome_desc">Allgemeine Infos für alle vermieteten Zimmer • Scrolle nach unten</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="panel">
+      <h3 id="t_addr_title">Adresse & Anfahrt</h3>
+      <p><strong id="t_addr_address">Carl-Benz-Straße 2, 69190 Walldorf</strong></p>
+      <div class="row">
+        <a class="btn" id="t_addr_map" href="https://maps.google.com/?q=Carl-Benz-Straße 2, 69190 Walldorf" target="_blank">In Karten öffnen</a>
+        <a class="btn" id="t_addr_pt" href="https://bahn.de" target="_blank">ÖPNV</a>
+      </div>
+      <p class="small" id="t_addr_note">Kostenlose Parkplätze stehen direkt auf dem Grundstück zur Verfügung.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="panel">
+      <h3 id="t_ci_title">Check-in & Check-out</h3>
+      <div>
+        <div class="small"><b id="t_checkin_label">Check-in</b></div>
+        <div id="t_checkin_text">ab 14:00 • Self Check-in</div>
+        <ul id="t_checkin_list">
+          <li>Zugangscode für das Außentor wird über Airbnb-Nachricht geschickt.</li>
+          <li>Schlüsselkasten-Nummer und PIN für den Zimmerschlüssel kommen ebenfalls über Airbnb.</li>
+        </ul>
+      </div>
+      <div style="margin-top:12px">
+        <div class="small"><b id="t_checkout_label">Check-out</b></div>
+        <div id="t_checkout_text">um 10:00</div>
+        <ul id="t_checkout_list">
+          <li>Beim Check-out bitte alle Fenster schließen und die Heizung ausschalten.</li>
+          <li>Den Zimmerschlüssel in den Schlüsselkasten oben neben dem Badezimmer einwerfen.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="panel">
+      <h3 id="t_rules_title">Hausordnung</h3>
+      <ul id="t_rules_list">
+        <li>Rauchen im Zimmer ist verboten.</li>
+        <li>Haustiere sind nicht erlaubt.</li>
+        <li>Keine Partys oder Veranstaltungen.</li>
+        <li>Nachtruhe von 22:00 bis 7:00 Uhr.</li>
+        <li>Keine fremden Personen ohne Anmeldung.</li>
+        <li>Beim Check-out bitte alle Fenster schließen und die Heizung ausschalten.</li>
+        <li>Für Ordnung und Sauberkeit sorgen.</li>
+        <li>Respektvoll mit Einrichtung, Nachbarn und Mitbewohnern umgehen.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <div class="panel">
+      <h3 id="t_route_title">Wegbeschreibung & Zugang</h3>
+      <ol id="t_route_list" style="margin-left: 22px;">
+        <li>Nach Ankunft das Außentor mit dem per Airbnb gesendeten PIN öffnen.</li>
+        <li>Nach dem Tor links Richtung Haustür gehen (die Tür mit den zwei Schlüsselkasten rechts daneben).</li>
+        <li>Über Airbnb erhältst du, welcher Schlüsselkasten für dich ist und den passenden PIN.</li>
+        <li>Schlüssel entnehmen, Schlüsselkasten schließen und mit dem Schlüssel durch die Haustür gehen.</li>
+        <li>Im Flur rechts abbiegen und die Treppe nach oben nehmen.</li>
+        <li>Oben sind die Zimmer mit Nummern ausgeschildert – bitte zum gebuchten Zimmer gehen.</li>
+        <li>Beim Check-out den Zimmerschlüssel in den Schlüsselkasten oben neben dem Badezimmer einwerfen.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section>
+    <div class="panel">
+      <h3 id="t_room_title">Zimmer & Ausstattung</h3>
+      <ul id="t_room_list">
+        <li><b>Handtücher & Bettwäsche:</b> sind inklusive.</li>
+        <li><b>Bettwäsche wechseln:</b> Wenn du frische Bettwäsche möchtest, kannst du sie selbst wechseln. Frische Bettwäsche liegt in der Kommode im Flur gegenüber vom Badezimmer.</li>
+        <li><b>Heizung & Lüften:</b> Heizung bitte auf 2–3; im Winter beim Verlassen auf 1. Stoßlüften statt Dauer-Kipp.</li>
+        <li><b>Küche / Kühlschrank:</b> gemeinschaftliche Nutzung möglich, bitte nach der Nutzung spülen und Flächen wischen.</li>
+        <li><b>Bad:</b> Eigene Hygieneartikel mitbringen; Föhn vorhanden.</li>
+        <li><b>Ruhezeiten:</b> 22:00–7:00 Uhr Zimmerlautstärke.</li>
+        <li><b>Müll:</b> Der Müll wird alle 3 Tage geleert – manchmal früher und immer sobald ein Behälter voll ist.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <div class="panel" id="druck">
+      <h3 id="t_print_title">Drucken</h3>
+      <p id="t_print_desc">Du kannst diese Infos als PDF speichern/teilen.</p>
+      <a class="btn" href="javascript:window.print()" id="t_print_btn">Seite als PDF drucken/teilen</a>
+    </div>
+  </section>
+</main>
+
+<footer>© <span id="year"></span> <span id="t_footer_brand">body & mind science</span> • <span id="t_footer_note">Bitte respektvoll mit Haus & Nachbarn umgehen.</span></footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // i18n strings (DE/EN), including full house rules and detailed directions
+  const STR = {
+    de: {
+      brand: "BMS • Hausordnung & Gäste-Info",
+      print: "Seite drucken",
+      modal_title: "Sprache wählen",
+      modal_desc: "Bitte wähle deine Sprache / Please choose your language.",
+      welcome_title: "Willkommen – Gästezimmer",
+      welcome_desc: "Allgemeine Infos für alle vermieteten Zimmer • Scrolle nach unten",
+      addr_title: "Adresse & Anfahrt",
+      addr_address: "Carl-Benz-Straße 2, 69190 Walldorf",
+      addr_map: "In Karten öffnen",
+      addr_pt: "ÖPNV",
+      addr_note: "Kostenlose Parkplätze stehen direkt auf dem Grundstück zur Verfügung.",
+      ci_title: "Check-in & Check-out",
+      checkin_label: "Check-in",
+      checkin_text: "ab 14:00 • Self Check-in",
+      checkin_list: [
+        "Zugangscode für das Außentor wird über Airbnb-Nachricht geschickt.",
+        "Schlüsselkasten-Nummer und PIN für den Zimmerschlüssel kommen ebenfalls über Airbnb."
+      ],
+      checkout_label: "Check-out",
+      checkout_text: "um 10:00",
+      checkout_list: [
+        "Beim Check-out bitte alle Fenster schließen und die Heizung ausschalten.",
+        "Den Zimmerschlüssel in den Schlüsselkasten oben neben dem Badezimmer einwerfen."
+      ],
+      rules_title: "Hausordnung",
+      rules_list: [
+        "Rauchen im Zimmer ist verboten.",
+        "Haustiere sind nicht erlaubt.",
+        "Keine Partys oder Veranstaltungen.",
+        "Nachtruhe von 22:00 bis 7:00 Uhr.",
+        "Keine fremden Personen ohne Anmeldung.",
+        "Beim Check-out bitte alle Fenster schließen und die Heizung ausschalten.",
+        "Für Ordnung und Sauberkeit sorgen.",
+        "Respektvoll mit Einrichtung, Nachbarn und Mitbewohnern umgehen."
+      ],
+      route_title: "Wegbeschreibung & Zugang",
+      route_list: [
+        "Nach Ankunft das Außentor mit dem per Airbnb gesendeten PIN öffnen.",
+        "Nach dem Tor links Richtung Haustür gehen (die Tür mit den zwei Schlüsselkasten rechts daneben).",
+        "Über Airbnb erhältst du, welcher Schlüsselkasten für dich ist und den passenden PIN.",
+        "Schlüssel entnehmen, Schlüsselkasten schließen und mit dem Schlüssel durch die Haustür gehen.",
+        "Im Flur rechts abbiegen und die Treppe nach oben nehmen.",
+        "Oben sind die Zimmer mit Nummern ausgeschildert – bitte zum gebuchten Zimmer gehen.",
+        "Beim Check-out den Zimmerschlüssel in den Schlüsselkasten oben neben dem Badezimmer einwerfen."
+      ],
+      room_title: "Zimmer & Ausstattung",
+      room_list: [
+        "<b>Handtücher & Bettwäsche:</b> sind inklusive.",
+        "<b>Bettwäsche wechseln:</b> Wenn du frische Bettwäsche möchtest, kannst du sie selbst wechseln. Frische Bettwäsche liegt in der Kommode im Flur gegenüber vom Badezimmer.",
+        "<b>Heizung & Lüften:</b> Heizung bitte auf 2–3; im Winter beim Verlassen auf 1. Stoßlüften statt Dauer-Kipp.",
+        "<b>Küche / Kühlschrank:</b> gemeinschaftliche Nutzung möglich, bitte nach der Nutzung spülen und Flächen wischen.",
+        "<b>Bad:</b> Eigene Hygieneartikel mitbringen; Föhn vorhanden.",
+        "<b>Ruhezeiten:</b> 22:00–7:00 Uhr Zimmerlautstärke.",
+        "<b>Müll:</b> Der Müll wird alle 3 Tage geleert – manchmal früher und immer sobald ein Behälter voll ist."
+      ],
+      print_title: "Drucken",
+      print_desc: "Du kannst diese Infos als PDF speichern/teilen.",
+      print_btn: "Seite als PDF drucken/teilen",
+      footer_note: "Bitte respektvoll mit Haus & Nachbarn umgehen."
+    },
+    en: {
+      brand: "BMS • House Rules & Guest Info",
+      print: "Print page",
+      modal_title: "Choose language",
+      modal_desc: "Please choose your language / Bitte wähle deine Sprache.",
+      welcome_title: "Welcome – Guest Rooms",
+      welcome_desc: "General info for all rented rooms • Scroll down",
+      addr_title: "Address & Arrival",
+      addr_address: "Carl-Benz-Straße 2, 69190 Walldorf",
+      addr_map: "Open in Maps",
+      addr_pt: "Public transport",
+      addr_note: "Free parking is available directly on our property.",
+      ci_title: "Check-in & Check-out",
+      checkin_label: "Check-in",
+      checkin_text: "from 14:00 • Self check-in",
+      checkin_list: [
+        "The gate PIN will be sent via Airbnb message.",
+        "Key box number and PIN for the room key will also be sent via Airbnb."
+      ],
+      checkout_label: "Check-out",
+      checkout_text: "at 10:00",
+      checkout_list: [
+        "At check-out, please close all windows and switch off the heating.",
+        "Drop the room key in the key box upstairs next to the bathroom."
+      ],
+      rules_title: "House Rules",
+      rules_list: [
+        "No smoking in the room.",
+        "No pets allowed.",
+        "No parties or events.",
+        "Quiet hours 22:00–7:00.",
+        "No unregistered guests.",
+        "At check-out, please close all windows and switch off the heating.",
+        "Keep things tidy and clean.",
+        "Be respectful with furniture, neighbors and co-guests."
+      ],
+      route_title: "Directions & Access",
+      route_list: [
+        "Upon arrival, open the outer gate using the PIN sent via Airbnb.",
+        "After the gate, turn left towards the front door (the door with two key boxes on the right).",
+        "You will receive which key box is yours and the PIN via Airbnb.",
+        "Take the key, close the key box and enter through the front door.",
+        "Turn right in the hallway and take the stairs up.",
+        "Upstairs, rooms are labeled with numbers – go to the room you booked.",
+        "At check-out, drop the room key in the key box upstairs next to the bathroom."
+      ],
+      room_title: "Room & Amenities",
+      room_list: [
+        "<b>Towels & linens:</b> included.",
+        "<b>Change of linens:</b> If you want fresh linens, you may change them yourself. Fresh linens are in the chest of drawers in the hallway opposite the bathroom.",
+        "<b>Heating & airing:</b> Set heating to 2–3; in winter set to 1 when leaving. Prefer short airing over tilted windows.",
+        "<b>Kitchen / fridge:</b> shared use is possible; please wash dishes and wipe surfaces after use.",
+        "<b>Bathroom:</b> bring your own toiletries; hairdryer available.",
+        "<b>Quiet hours:</b> 22:00–7:00 keep noise down.",
+        "<b>Garbage:</b> Collected every 3 days – sometimes earlier and always as soon as a bin is full."
+      ],
+      print_title: "Print",
+      print_desc: "You can save/share this info as a PDF.",
+      print_btn: "Print / Save as PDF",
+      footer_note: "Please be respectful with the house & neighbors."
+    }
+  };
+
+  // map element IDs to i18n keys
+  const EL = {
+    t_brand:'brand', t_print:'print',
+    t_modal_title:'modal_title', t_modal_desc:'modal_desc',
+    t_welcome_title:'welcome_title', t_welcome_desc:'welcome_desc',
+    t_addr_title:'addr_title', t_addr_address:'addr_address', t_addr_map:'addr_map', t_addr_pt:'addr_pt', t_addr_note:'addr_note',
+    t_ci_title:'ci_title', t_checkin_label:'checkin_label', t_checkin_text:'checkin_text', t_checkout_label:'checkout_label', t_checkout_text:'checkout_text',
+    t_rules_title:'rules_title', t_route_title:'route_title', t_room_title:'room_title',
+    t_print_title:'print_title', t_print_desc:'print_desc', t_print_btn:'print_btn',
+    t_footer_note:'footer_note', t_footer_brand:'brand'
+  };
+
+  function setList(id, items) {
+    const el = document.getElementById(id);
+    el.innerHTML = items.map(x => `<li>${x}</li>`).join('');
+  }
+
+  function setLang(lang) {
+    const S = STR[lang];
+    for(const id in EL) {
+      const key = EL[id];
+      const el = document.getElementById(id);
+      if(el && S[key]) el.innerHTML = S[key];
+    }
+    setList('t_checkin_list', S.checkin_list);
+    setList('t_checkout_list', S.checkout_list);
+    setList('t_rules_list', S.rules_list);
+    setList('t_route_list', S.route_list);
+    setList('t_room_list', S.room_list);
+
+    localStorage.setItem('bms_lang', lang);
+    document.documentElement.lang = (lang==='de'?'de':'en');
+  }
+
+  // Language modal logic – FIXED so it closes immediately on click
+  const langModal = document.getElementById('langModal');
+  document.getElementById('chooseDE').addEventListener('click', function() {
+    setLang('de'); langModal.style.display='none';
+  });
+  document.getElementById('chooseEN').addEventListener('click', function() {
+    setLang('en'); langModal.style.display='none';
+  });
+  document.getElementById('btnChangeLang').addEventListener('click', function() {
+    langModal.style.display='flex';
+  });
+
+  // Initialize language (show modal only on first visit)
+  const saved = localStorage.getItem('bms_lang');
+  if(saved) {
+    setLang(saved);
+    langModal.style.display='none';
+  } else {
+    langModal.style.display='flex';
+  }
+
+  // Year
+  document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>
